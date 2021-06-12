@@ -10,18 +10,18 @@ This scenario is a particularly good demonstration of how time-series regression
 #####  Step 1 - The Basics
 Load and clean the data with Pandas, of course.
 * Load it with Pandas and convert to dataframe, which will make it easier to work with
-* Grab data of interest and drop the interest
-* Establish a reference date (March 1958)
+* Grab data of interest and drop the rest
+* Establish a reference date (March 1958, first measurement)
 
 Create utility functions
-* split_data():  - We will train our model on the "train" set and evaluate its performance on the "test" set
+* split_data():  - We will train the model on the "train" set and evaluate its performance on the "test" set
 * calc_error(): - Resid, RMSE, MAPE
   * We will calculate the residuals - the sum of the difference between the model predicted value and ground truth.
-  * We will use root mean square error (RMSE) to evaluate the quality of regressions, but we will also calculate mean absolute percentage error (MAPE). These will typically be calculated on the "test" data to evaluate the model performance. Both algorithms are available through SKLearn.
+  * We will use root mean square error (RMSE) to evaluate the quality of regressions, and we will also calculate mean absolute percentage error (MAPE). These will typically be calculated on the "test" data to evaluate the model performance. Both algorithms are available through SKLearn.
 * Interpolate1d_function - simple interpolation
 
 #### Step 2 - The Regression
-The methodology is straightforward - let's plot the linear, quadratic, and cubic regressions with their respective RMSEs.
+The implementation is simple with SKLearn - let's plot the linear, quadratic, and cubic regressions with their respective RMSEs.
 
 ![Linear Regression](CO2_Plots/CO2_Linear_Regression.png)
 
@@ -29,11 +29,11 @@ The methodology is straightforward - let's plot the linear, quadratic, and cubic
 
 ![Cubic Regression](CO2_Plots/CO2_Cubic_Regression.png)
 
-It's clear that the lowest test error is with quadratic regression, we are not capturing the cyclic nature of the data. We could plot the residuals and observe that there is a trend, which indicates that the series is not yet stationary.
+It's clear that the lowest test error is with quadratic regression, but we are not capturing the cyclic nature of the data. We could also plot the residuals and observe that there is a trend, which indicates that the series is not yet stationary.
 
 #### Step 3 - Cyclic Regression
 
-There's obviously a cyclic nature to CO2 concentration at this specific location. This can be explained by seasonal changes that impact vegetation, soil moisture, and ocean temperature.
+There's obviously a cyclic nature to CO2 concentration. This can be explained by seasonal changes that impact vegetation, soil moisture, and ocean temperature.
 
 Let's remove the periodic residual from the trend by computing the monthly mean of the residuals from the quadratic regression. These are plotted below.
 
@@ -55,15 +55,14 @@ Visualizing the residuals from before and after the cyclic trend were removed is
 
 ![Residuals](CO2_Plots/Residuals.png)
 
-The upward trend in the residual indicates that we are underpredicting CO2 closer to present-day. This is result of how we split the train and test data. We can keep this in mind when extrapolating beyond present-day; this analysis definitely does __not__ represent the worst-case. In fact, we might actually get better predictions by performing the regression on _less_ data
+The upward trend in the residual indicates that we are underpredicting CO2 closer to present-day. We can keep this in mind when extrapolating beyond present-day; this analysis definitely does __not__ represent the worst-case. In fact, we might actually get better predictions by performing the regression on _less_ data
 
 
 #### CO2_Prediction.py - Extrapolation
 
 #### Step 1 - Load data & Create Train/Test split
 
-Training data is all seen data, and our test set are the date indices from present until 2050
-
+Training data is all seen data, and our test set is from 2019 to 2050
 
 #### Step 2 - Quadratic Regression
 
@@ -77,9 +76,9 @@ We need to explicitly return the residuals in order to calculate the periodic re
 
 #### Step 4 - Calculate Periodic Residuals
 
-Calculate the periodic residuals in the same way as the CO2_model file
+Calculate the periodic residuals in the same way as before
 
-#### Step 5 - Create Test Dataframe
+#### Step 5 - Create Test Data
 
 We want to create a separate dataframe for all unseen data, which has info in the Date Index, Month, Year, and Periodic Residual columns. CO2 is np.NAN, as there is obviously no ground truth.
 
