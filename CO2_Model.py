@@ -26,6 +26,18 @@ def load_data():
     return co2_df_load
 
 
+def split_data(features, labels, split_frac=.8):
+    # Converts df to numpy then splits the data
+    split_num = int(split_frac * len(features))
+    features = features.to_numpy().reshape(-1, 1)
+    labels = labels.to_numpy().reshape(-1, 1)
+    train_f = features[0:split_num]
+    test_f = features[split_num:]
+    train_l = labels[0:split_num]
+    test_l = labels[split_num:]
+    return train_f, test_f, train_l, test_l
+
+
 def calc_error(y, predicted_y):
     # Computes the residuals, root mean squared error, and mean absolute percentage error
     resid = np.zeros([len(y), 1])
@@ -34,6 +46,11 @@ def calc_error(y, predicted_y):
     rmse = metrics.mean_squared_error(y, predicted_y) ** .5
     mape = metrics.mean_absolute_percentage_error(y, predicted_y)
     return resid, rmse, mape * 100
+
+
+def interpolate1d_function(x, y, x_new):
+    f = interp1d(x, y)
+    return f(x_new)
 
 
 def poly_regression(x, y, test_x, test_y=None, degree=2, error=False):
@@ -61,18 +78,6 @@ def linear_regression(x, y, test_x, test_y=None, error=False):
         return lr.coef_, lr.intercept_, predicted_y, predict_test_y
 
 
-def split_data(features, labels, split_frac=.8):
-    # Converts df to numpy then splits the data
-    split_num = int(split_frac * len(features))
-    features = features.to_numpy().reshape(-1, 1)
-    labels = labels.to_numpy().reshape(-1, 1)
-    train_f = features[0:split_num]
-    test_f = features[split_num:]
-    train_l = labels[0:split_num]
-    test_l = labels[split_num:]
-    return train_f, test_f, train_l, test_l
-
-
 def plot_data(train_x, train_y, test_x, test_y, pred_y_train, pred_y_test, title, error):
     fig, ax = plt.subplots()
     ax.scatter(train_x + 1958 + 2 / 12, train_y, s=5, label="Training Data, Raw")
@@ -83,7 +88,7 @@ def plot_data(train_x, train_y, test_x, test_y, pred_y_train, pred_y_test, title
     ax.set_xlabel("Year")
     ax.set_ylabel("CO2 (ppm)")
     ax.legend()
-    plt.savefig("CO2_Plots/" + title.replace(" ", "_") + ".png")
+    # plt.savefig("CO2_Plots/" + title.replace(" ", "_") + ".png")
     plt.show()
 
 
@@ -98,7 +103,8 @@ def plot_cyclic(x, y):
     x_interp = np.arange(1, 12, .1)
     y_interp = interpolate1d_function(x, y, x_interp)
     ax.plot(x_interp, y_interp)
-    plt.savefig("CO2_Plots/" + title.replace(" ", "_") + ".png")
+    fig.tight_layout()
+    # plt.savefig("CO2_Plots/" + title.replace(" ", "_") + ".png")
     plt.show()
 
 
@@ -108,13 +114,8 @@ def sub_plot_data(test_x, resid_quadratic, resid_final):
     ax[1].scatter(test_x, resid_final, c="seagreen")
     ax[0].set_title("Residuals After Trend Removal")
     ax[1].set_title("Residuals After Trend & Cyclic Removal")
-    plt.savefig("CO2_Plots/Residuals.png")
+    # plt.savefig("CO2_Plots/Residuals.png")
     plt.show()
-
-
-def interpolate1d_function(x, y, x_new):
-    f = interp1d(x, y)
-    return f(x_new)
 
 
 def main():

@@ -60,9 +60,10 @@ co2_df["Predicted CO2 Concentration"] = co2_df["Date Index"] * first_order + \
 # Step 8: Plot data
 fig, ax = plt.subplots()
 ax.scatter(co2_df["Date Index"] + start_year + 3/12, co2_df["CO2"], s=5, label="Training Data, Raw")
-ax.plot(co2_df["Date Index"] + start_year + 3/12, co2_df["Predicted CO2 Concentration"], label="Predicted Data", c="maroon", linewidth=.65)
+ax.plot(co2_df["Date Index"] + start_year + 3/12, co2_df["Predicted CO2 Concentration"], label="Predicted Data", c="seagreen", linewidth=.65)
 ax.set_title(f"Extrapolated CO2 Concentration to {extrapolate_to_date}")
 ax.set_ylabel("CO2 (ppm)")
 ax.set_xticks(np.arange(1950, extrapolate_to_date+10, 10))
 ax.legend()
+# plt.savefig("CO2_Plots/Extrapolated_CO2_Concentration.png")
 plt.show()
