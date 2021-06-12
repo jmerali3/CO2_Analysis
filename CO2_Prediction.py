@@ -8,11 +8,13 @@ import itertools
 # Predict CO2 concentration over the next n years
 
 extrapolate_to_date = 2050  # will extrapolate until February of the selected year
+start_year = 1958  # Do not change this variable
 
 # Step 1: Load data, create training features and labels (until 2019), and create test features (future dates)
 co2_df = CO2_Model.load_data()
-train_f, train_l = co2_df["Date Index"].to_numpy().reshape(-1, 1), co2_df["CO2"].to_numpy().reshape(-1, 1)
-test_f = np.arange(train_f[-1] + 1/12, (extrapolate_to_date - 1958) + 1/12, 1/12).reshape(-1, 1)  # start year is 1958
+train_f = co2_df["Date Index"].to_numpy().reshape(-1, 1)
+train_l = co2_df["CO2"].to_numpy().reshape(-1, 1)
+test_f = np.arange(train_f[-1] + 1/12, (extrapolate_to_date - start_year) + 1/12, 1/12).reshape(-1, 1)  # start year is 1958
 
 # Step 2: Perform quadratic regression to obtain coefficients & intercept and predicted CO2
 (
@@ -57,8 +59,8 @@ co2_df["Predicted CO2 Concentration"] = co2_df["Date Index"] * first_order + \
 
 # Step 8: Plot data
 fig, ax = plt.subplots()
-ax.scatter(co2_df["Date Index"] + 1958 + 3/12, co2_df["CO2"], s=5, label="Training Data, Raw")
-ax.plot(co2_df["Date Index"] + 1958 + 3/12, co2_df["Predicted CO2 Concentration"], label="Predicted Data", c="maroon", linewidth=.65)
+ax.scatter(co2_df["Date Index"] + start_year + 3/12, co2_df["CO2"], s=5, label="Training Data, Raw")
+ax.plot(co2_df["Date Index"] + start_year + 3/12, co2_df["Predicted CO2 Concentration"], label="Predicted Data", c="maroon", linewidth=.65)
 ax.set_title(f"Extrapolated CO2 Concentration to {extrapolate_to_date}")
 ax.set_ylabel("CO2 (ppm)")
 ax.set_xticks(np.arange(1950, extrapolate_to_date+10, 10))
