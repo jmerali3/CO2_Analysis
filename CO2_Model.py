@@ -112,7 +112,7 @@ def main():
     co2_df = load_data()
     train_f, test_f, train_l, test_l = split_data(co2_df["Date Index"], co2_df.CO2)  # date = feature (f), co2 = labels (l)
 
-    ### LINEAR REGRESSION ###
+    ### Linear Regression ###
     (
         coef_linear, intercept_linear, # Coefficient(s) and y intercept
         predicted_co2_train_linear, predicted_co2_test_linear,
@@ -123,7 +123,7 @@ def main():
         if plot is True else None
 
 
-    ### Quadratic REGRESSION ###
+    ### Quadratic Regression ###
     (
         coef_quadratic, intercept_quadratic, # Coefficient(s) and y intercept
         predicted_co2_train_quadratic, predicted_co2_test_quadratic,
@@ -133,7 +133,7 @@ def main():
     plot_data(train_f, train_l, test_f, test_l, predicted_co2_train_quadratic, predicted_co2_test_quadratic, title_quadratic) \
         if plot is True else None
 
-    ### Cubic REGRESSION ###
+    ### Cubic Regression ###
     (
         coef_cubic, intercept_cubic, # Coefficient(s) and y intercept
         predicted_co2_train_cubic, predicted_co2_test_cubic,
@@ -143,7 +143,7 @@ def main():
     plot_data(train_f, train_l, test_f, test_l, predicted_co2_train_cubic, predicted_co2_test_cubic, title_cubic) \
         if plot is True else None
 
-    ### FIT PERDIODIC ###
+    ### Fit Periodic Signal ###
     train_resid_quadratic, _, _ = calc_error(predicted_co2_train_quadratic, train_l)
     zero_resid = np.zeros([len(co2_df) - len(train_resid_quadratic), 1])
     resid_joined = np.concatenate([-train_resid_quadratic, zero_resid])
@@ -159,7 +159,7 @@ def main():
     plot_cyclic(cyclic_avg["Month"], cyclic_avg["Periodic Residual"]) if plot is True else None
 
 
-    ### FINAL MODEL - PERIODIC + Quadratic ###
+    ### Final Model - Quadratic & Periodic Signals ###
     coef = coef_quadratic.reshape(3)
     first_order, second_order = coef[1], coef[2]
     co2_df["predicted_y"] = co2_df["Date Index"] * first_order + \
@@ -172,7 +172,7 @@ def main():
     plot_data(train_f, train_l, test_f, test_l, predicted_co2_train, predicted_co2_test, title_final) \
         if plot is True else None
 
-    ### RESID PLOTS ###
+    ### Residual plots from before and after periodicc signal fitting ###
     sub_plot_data(test_f, resid_quadratic, resid_test_final) if plot is True else None
 
 
