@@ -35,7 +35,7 @@ It's clear that the lowest test error is with quadratic regression, but we are n
 
 There's obviously a cyclic nature to CO2 concentration. This can be explained by seasonal changes that impact vegetation, soil moisture, and ocean temperature.
 
-Let's remove the periodic residual from the trend by computing the monthly mean of the residuals from the quadratic regression. These are plotted below.
+The periodic residual is the monthly mean of the residuals from the quadratic regression. These are plotted below.
 
 ![Cubic Regression](CO2_Plots/Monthly_Periodic_Trend.png)
 
@@ -86,12 +86,11 @@ We want to create a separate dataframe for all unseen data, which has info in th
 
 Merge CO2 and CO2 test dataframes.
 
-#### Step 7 - Final model
+#### Step 7 - Final Model
 
 Calculate the predicted atmospheric CO2 concentration based on the regression and residuals from all known data from 1958 to 2019.
 
-#### Step 8 - Plot Dataframe
-
+#### Step 8 - Plot Data
 
 ![Final Regression to 2050](CO2_Plots/Extrapolated_CO2_Concentration.png)
 
