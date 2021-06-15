@@ -13,6 +13,9 @@ plt.style.use("seaborn")
 # The purpose of this program is to determine the optimal way to model CO2 concentration increases over time
 
 def load_data():
+    """Loads data from .csv file into pandas dataframe, creates a reference, and drops unused columns
+    Reference is March 1958 because that is the first data point from the observatory
+    """
     column_names = ["Year", "Month", "Date Excel", "Date", "CO2", "Seasonally Adjusted CO2 (ppm)", "Fit (ppm)",
                     "Seasonally Adjusted Fit (ppm)", "CO2 Filled (ppm)", "Seasonally Adjusted Filled (ppm)"]
     co2_df_load = pd.read_csv("CO2_copy.csv", names=column_names)
@@ -27,7 +30,7 @@ def load_data():
 
 
 def split_data(features, labels, split_frac=.8):
-    # Converts df to numpy then splits the data
+    """Converts the feature and label Pandas series to numpy then splits into train and test sets"""
     split_num = int(split_frac * len(features))
     features = features.to_numpy().reshape(-1, 1)
     labels = labels.to_numpy().reshape(-1, 1)
@@ -39,7 +42,8 @@ def split_data(features, labels, split_frac=.8):
 
 
 def calc_error(y, predicted_y):
-    # Computes the residuals, root mean squared error, and mean absolute percentage error
+    ''' Computes the residuals, root mean squared error, and mean absolute percentage error'''
+    # TODO Add error_dict and return
     resid = np.zeros([len(y), 1])
     for i, (y_i, yp_i) in enumerate(zip(y, predicted_y)):
         resid[i] = y_i - yp_i
@@ -49,16 +53,22 @@ def calc_error(y, predicted_y):
 
 
 def interpolate1d_function(x, y, x_new):
+    '''Interpolates between x and y and returns the y values associated with x_new'''
     f = interp1d(x, y)
     return f(x_new)
 
 
 def poly_regression(x, y, test_x, test_y=None, degree=2, error=False):
-    # Linearizes the values according to the degree of the polynomial and then calls linear regression
+    '''Linearizes the values according to the degree of the polynomial and then calls linear regression
+    This will call the error function and return the error_dictionary if error=True
+    '''
     pr = PolynomialFeatures(degree=degree)
     x_poly = pr.fit_transform(x)
     test_x_poly = pr.fit_transform(test_x)
     coef, intercept, predicted_y, predict_test_y = linear_regression(x_poly, y, test_x_poly, test_y)
+    # TODO remove if statement and put outputs in a dictionary
+    # error_dict = calc_error(test_y, predict_test_y) if error else None
+    # return coef, intercept, predicted_y, predict_test_y, error_dict
     if error:
         resid, rmse, mape = calc_error(test_y, predict_test_y)
         return coef, intercept, predicted_y, predict_test_y, resid, rmse, mape
@@ -67,10 +77,16 @@ def poly_regression(x, y, test_x, test_y=None, degree=2, error=False):
 
 
 def linear_regression(x, y, test_x, test_y=None, error=False):
+    '''Performs linear regression fitted on x and y and returns the model parameters and predicted y
+    This will call the error function and return the error_dictionary if error=True
+    '''
     lr = linear_model.LinearRegression()
     lr.fit(x, y)
     predicted_y = lr.predict(x)
     predict_test_y = lr.predict(test_x)
+    # TODO remove if statement and put outputs in a dictionary
+    # error_dict = calc_error(test_y, predict_test_y) if error else None
+    # return lr.coef_, lr.intercept_, predicted_y, predict_test_y, error_dict
     if error:
         resid, rmse, mape = calc_error(test_y, predict_test_y)
         return lr.coef_, lr.intercept_, predicted_y, predict_test_y, resid, rmse, mape
@@ -79,6 +95,9 @@ def linear_regression(x, y, test_x, test_y=None, error=False):
 
 
 def plot_data(train_x, train_y, test_x, test_y, pred_y_train, pred_y_test, title, error):
+    '''Plots the training and test ground truth data and the predicted data'''
+    # TODO put input paramters in a dictionary
+    # TODO remove title and error and savefig. Figures arent changing
     fig, ax = plt.subplots()
     ax.scatter(train_x + 1958 + 2 / 12, train_y, s=5, label="Training Data, Raw")
     ax.scatter(test_x + 1958 + 2 / 12, test_y, s=5, label="Test Data, Raw")
@@ -93,6 +112,7 @@ def plot_data(train_x, train_y, test_x, test_y, pred_y_train, pred_y_test, title
 
 
 def plot_cyclic(x, y):
+    '''Plots the continuous monthly periodic trend by calling the interpolation function'''
     title = "Monthly Periodic Trend"
     fig, ax = plt.subplots()
     plt.xticks(rotation=45)
@@ -109,11 +129,12 @@ def plot_cyclic(x, y):
 
 
 def sub_plot_data(test_x, resid_quadratic, resid_final):
+    '''Plots the residuals from after trend removal and after trend and periodic residual removal'''
     fig, ax = plt.subplots(nrows=1, ncols=2, sharey=True, sharex=True)
     ax[0].scatter(test_x, resid_quadratic, c="seagreen")
     ax[1].scatter(test_x, resid_final, c="seagreen")
-    ax[0].set_title("Residuals After Trend Removal")
-    ax[1].set_title("Residuals After Trend & Cyclic Removal")
+    ax[0].set_title("Residuals After Trend Residual Removal")
+    ax[1].set_title("Residuals After Trend & Periodic Residuals Removal")
     # plt.savefig("CO2_Plots/Residuals.png")
     plt.show()
 
