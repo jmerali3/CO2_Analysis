@@ -44,10 +44,10 @@ The periodic residual is the monthly mean of the residuals from the quadratic re
 The final model incorporates the coefficients and y-intercept from the quadratic regression with the cyclic regression in the formula
 
 ```python
-co2_df["predicted_y"] = co2_df["Date Index"] * first_order + \
-                           co2_df["Date Index"] ** 2 * second_order + \
-                           intercept_quadratic + \
-                           co2_df["Periodic Residual"]
+    co2_df["predicted_y"] = co2_df["Date Index"] * first_order + \
+                            co2_df["Date Index"] ** 2 * second_order + \
+                            quadratic_dict["intercept"] + \
+                            co2_df["Periodic Residual"]
 ```
 ![Final Regression](CO2_Plots/CO2_Periodic_&_Quadratic_Regression.png)
 
