@@ -6,11 +6,9 @@ from sklearn import metrics
 from sklearn.preprocessing import PolynomialFeatures
 from scipy.interpolate import interp1d
 import calendar
-
 plt.style.use("seaborn")
 
-
-# The purpose of this program is to determine the optimal way to model CO2 concentration increases over time
+"""The purpose of this program is to determine the optimal way to model CO2 concentration increases over time"""
 
 def load_data():
     """Loads data from .csv file into pandas dataframe, creates a reference, and drops unused columns
@@ -87,7 +85,6 @@ def poly_regression(x, test_x, y, test_y=None, degree=2, error=False):
 
 def plot_data(split_data_tuple, predictions, title):
     '''Plots the training and test ground truth data and the predicted data'''
-    # TODO put input parameters in a tuple
     train_x, test_x, train_y, test_y = split_data_tuple
     pred_y_train, pred_y_test = predictions
     fig, ax = plt.subplots()
@@ -134,31 +131,39 @@ def sub_plot_data(test_x, resid_quadratic, resid_final):
 
 
 def main():
+    """Splits data into training and test sets, then calls regression, error, and plotting functions
+       to find and visualize the best modeling parameters; combines it into an overall CO2 model
+    1. Linear regression
+    2. Quadratic regression (best)
+    3. Cubic Regression
+    4. Use quadratic residuals to calculate monthly periodic residuals
+    5. Incorporates quadratic parameters and monthly periodic trend into a final model and plots over raw data
+    6. Plots residuals from de-trending
+    """
     plot = True  # set to False to hide plots
     co2_df = load_data()
     split_data_tuple = split_data(co2_df["Date Index"], co2_df.CO2)
     train_date_index, test_date_index, train_y, test_y = split_data_tuple
-    # date = feature (f), co2 = labels (l)
 
-    ### Linear Regression ###
+    # Linear Regression
     linear_dict, linear_error_dict = linear_regression(*split_data_tuple, error=True)
     predictions_linear = linear_dict["predicted_train_y"], linear_dict["predicted_test_y"]
     title_linear = f"CO2 Linear Regression - RMSE:{round(linear_error_dict['rmse'],2)}"
     plot_data(split_data_tuple, predictions_linear, title_linear) if plot is True else None
 
-    ### Quadratic Regression ###
+    # Quadratic Regression
     quadratic_dict, quadratic_error_dict = poly_regression(*split_data_tuple, degree=2, error=True)
     predictions_quadratic = quadratic_dict["predicted_train_y"], quadratic_dict["predicted_test_y"]
     title_quadratic = f"CO2 Quadratic Regression - RMSE: {round(quadratic_error_dict['rmse'],2)}"
     plot_data(split_data_tuple, predictions_quadratic, title_quadratic) if plot is True else None
 
-    ### Cubic Regression ###
+    # Cubic Regression
     cubic_dict, cubic_error_dict = poly_regression(*split_data_tuple, degree=3, error=True)
     predictions_cubic = cubic_dict["predicted_train_y"], cubic_dict["predicted_test_y"]
     title_cubic = f"CO2 Cubic Regression - RMSE: {round(cubic_error_dict['rmse'],2)}"
     plot_data(split_data_tuple, predictions_cubic, title_cubic) if plot is True else None
 
-    ### Fit Periodic Signal ###
+    # Fit Periodic Signal
     periodic_error_dict = calc_error(quadratic_dict["predicted_train_y"], train_y)
     train_resid_quadratic = periodic_error_dict["resid"]
     zero_resid = np.zeros([len(co2_df) - len(train_resid_quadratic), 1])
@@ -174,7 +179,7 @@ def main():
     co2_df = co2_df.merge(cyclic_avg, on="Month", how='left')
     plot_cyclic(cyclic_avg["Month"], cyclic_avg["Periodic Residual"]) if plot is True else None
 
-    ### Final Model - Quadratic & Periodic Signals ###
+    # Final Model - Quadratic & Periodic Signals
     coef = quadratic_dict["coef"].reshape(3)
     first_order, second_order = coef[1], coef[2]
     co2_df["predicted_y"] = co2_df["Date Index"] * first_order + \
@@ -186,7 +191,7 @@ def main():
     title_final = f"CO2 Complete Model - RMSE: {round(final_error_dict['rmse'], 2)}"
     plot_data(split_data_tuple, final_predictions[-2:], title_final) if plot is True else None
 
-    ### Residual plots from before and after periodicc signal fitting ###
+    # Residual plots from before and after periodicc signal fitting
     sub_plot_data(test_date_index, quadratic_error_dict["resid"], final_error_dict["resid"]) if plot is True else None
 
 
